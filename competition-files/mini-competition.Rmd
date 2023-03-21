@@ -6,3 +6,37 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+
+```{r libraries}
+library(tidyverse)
+```
+
+```{r read data}
+inventory <- read.csv("data/inventory.csv")
+```
+
+```{r explore data}
+summary(inventory)
+
+n_distinct(inventory$item_no)
+
+inventory %>% 
+  group_by(item_no) %>% 
+  summarise(min = min(sold),
+            q1 = quantile(sold, 0.25),
+            median = median(sold),
+            mean = mean(sold),
+            q3 = quantile(sold, 0.75),
+            max = max(sold)) %>% 
+  arrange(mean)
+```
+
+```{r plot data}
+inventory %>% 
+  filter(item_no == "A510004") %>% 
+  ggplot(aes(x = week, y = sold)) +
+  geom_line() +
+  theme_bw()
+```
+
