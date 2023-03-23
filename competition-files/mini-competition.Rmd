@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries}
 library(tidyverse)
+library(tidyr)
 ```
 
 ```{r read data}
@@ -38,5 +39,67 @@ inventory %>%
   ggplot(aes(x = week, y = sold)) +
   geom_line() +
   theme_bw()
+```
+
+```{r inventory months}
+inventory_month <- inventory %>% 
+  mutate(month = ceiling(week/4))
+```
+
+
+```{r pivot inventory}
+inventory_pivot <- inventory %>% 
+           #if( week == 53) {"Current"} else{ paste("WeeksAway", 53 - week, sep = "") } ) %>% 
+  mutate(weeks_away = paste("WeeksAway", 53 - week, sep = "")) %>% 
+  select(item_no, weeks_away, sold) %>% 
+  pivot_wider(names_from=weeks_away, values_from=sold)
+```
+
+```{r model inventory}
+inventory_pivot_no_item <-inventory_pivot %>% 
+  select(-item_no)
+model<-glm(WeeksAway0 ~ ., data = inventory_pivot_no_item)
+summary(model)
+```
+
+```{r pivot month}
+inventory_month_pivot <- inventory_month %>% 
+  mutate(months_away = paste("MonthsAway", month, sep = "")) %>%
+  group_by(item_no, months_away) %>% 
+  summarise(sold = sum(sold)) %>% 
+  pivot_wider(names_from=months_away, values_from=sold)
+```
+
+```{r model my month}
+inventory_month_pivot_no_item <- inventory_month_pivot %>% 
+  select(-item_no)
+model<-glm(MonthsAway0 ~ . -item_no, data = inventory_month_pivot_no_item)
+summary(model)
+```
+
+
+
+
+
+```{r visualize and model by sum}
+org_inventory <- inventory %>% 
+  group_by(week) %>% 
+  summarise(sold = sum(sold)) 
+
+org_inventory %>% 
+  ggplot(aes(x=week, y=sold)) +
+  geom_line() +
+  theme_bw()
+```
+
+```{r org pivot}
+org_inventory_pivot <- org_inventory %>%   
+  mutate(weeks_away = paste("WeeksAway", 53 - week, sep = "")) %>% 
+  select(weeks_away, sold) %>% 
+  pivot_wider(names_from=weeks_away, values_from=sold)
+```
+
+```{r org model}
+glm(WeeksAway0~ ., data = org_inventory_pivot)
 ```
 
