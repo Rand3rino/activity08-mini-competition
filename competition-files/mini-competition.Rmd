@@ -71,9 +71,7 @@ inventory_month_pivot <- inventory_month %>%
 ```
 
 ```{r model my month}
-inventory_month_pivot_no_item <- inventory_month_pivot %>% 
-  select(-item_no)
-model<-glm(MonthsAway0 ~ . -item_no, data = inventory_month_pivot_no_item)
+model<-glm(MonthsAway0 ~ . -item_no, data = inventory_month_pivot)
 summary(model)
 ```
 

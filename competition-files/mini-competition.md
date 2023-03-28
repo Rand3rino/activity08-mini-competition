@@ -184,20 +184,13 @@ inventory_month_pivot <- inventory_month %>%
     ## `.groups` argument.
 
 ``` r
-inventory_month_pivot_no_item <- inventory_month_pivot %>% 
-  select(-item_no)
-```
-
-    ## Adding missing grouping variables: `item_no`
-
-``` r
-model<-glm(MonthsAway0 ~ . -item_no, data = inventory_month_pivot_no_item)
+model<-glm(MonthsAway0 ~ . -item_no, data = inventory_month_pivot)
 summary(model)
 ```
 
     ## 
     ## Call:
-    ## glm(formula = MonthsAway0 ~ . - item_no, data = inventory_month_pivot_no_item)
+    ## glm(formula = MonthsAway0 ~ . - item_no, data = inventory_month_pivot)
     ## 
     ## Deviance Residuals: 
     ##     Min       1Q   Median       3Q      Max  
