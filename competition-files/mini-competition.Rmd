@@ -39,6 +39,14 @@ inventory %>%
   ggplot(aes(x = week, y = sold)) +
   geom_line() +
   theme_bw()
+
+
+inventory %>% 
+  filter(item_no == "154-2424B") %>% 
+  ggplot(aes(x = week, y = sold)) +
+  geom_line() +
+  theme_bw() + 
+  ggtitle("154-2424B Shipment History")
 ```
 
 ```{r inventory months}
@@ -99,5 +107,38 @@ org_inventory_pivot <- org_inventory %>%
 
 ```{r org model}
 glm(WeeksAway0~ ., data = org_inventory_pivot)
+```
+
+```{r item classes}
+item_class <- inventory %>% group_by(item_no)
+
+item_class <- item_class %>% mutate(item_class = nchar(item_no))
+```
+
+```{r item order frequency}
+order_frequency <- inventory %>% 
+  filter(sold > 0) %>% 
+  group_by(item_no) %>% 
+  summarise(count = n()) %>% 
+  arrange(count)
+
+order_frequency <- order_frequency %>% 
+  mutate(is_frequent = count >= 12)
+```
+
+```{r join inventory month pivot and order frequency}
+frequent_inventory_month_pivot <- list(inventory_month_pivot, order_frequency) %>% 
+  reduce(full_join, by='item_no') %>% 
+  filter(is_frequent)
+
+
+model<-glm(MonthsAway0 ~ . -item_no -is_frequent -count, data = frequent_inventory_month_pivot, family = "poisson")
+summary(model)
+
+resid(model)
+fitted.values(model)
+
+ggplot(model, aes(x=resid(model), y=fitted.values(model))) +
+  geom_point() + theme_bw() + ggtitle("Fitted vs Residuals")
 ```
 
